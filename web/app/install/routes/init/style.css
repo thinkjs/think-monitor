@@ -1,0 +1,21 @@
+.form-header {
+	text-align: center;
+	margin: 20px 0;
+	font-size: 30px;
+}
+.form-top-content {
+	text-align: center;
+}
+.form-bottom-content {
+	margin-top: 50px;
+	text-align: center;
+}
+.form-submit-btn {
+	position: absolute;
+	left: 50%;
+	margin-left: -40px;
+	margin-top: 40px;
+}
+.ant-form-item {
+	margin: 10px;
+}

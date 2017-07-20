@@ -1,6 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const influx = require('./service/influx');
+const init = require('./service/init/init');
 const schedule = require('node-schedule');
 var cors = require('cors');
 const path = require('path');
@@ -42,6 +43,11 @@ app.get("/host", cors(), function(req, res) {
   influx.readHost(req.query).then(data=>{
     res.send(data);
   });
+});
+
+app.post("/init", cors(), function(req, res) {
+  init.init(req.body);
+  //res.send(JSON.stringify(req));
 });
 
 app.get(/^\/monitor(\/?).*$/, cors(), function(req, res) {
