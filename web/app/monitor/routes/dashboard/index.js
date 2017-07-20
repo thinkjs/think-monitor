@@ -1,4 +1,3 @@
-
 import RBAuthRoute from 'components/auth-route';
 
 export default RBAuthRoute({
