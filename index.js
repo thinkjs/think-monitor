@@ -47,6 +47,9 @@ app.get("/host", cors(), function(req, res) {
 app.get(/^\/monitor(\/?).*$/, cors(), function(req, res) {
   res.sendFile( path.join(__dirname, 'web/monitor.html') );
 });
+app.get(/^\/install(\/?).*$/, cors(), function(req, res) {
+  res.sendFile( path.join(__dirname, 'web/install.html') );
+});
 
 
 app.get(/^(.+)$/, function(req, res){

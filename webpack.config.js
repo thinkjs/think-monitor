@@ -13,7 +13,10 @@ if (allowedEnvs.indexOf(env) === -1) {
 process.env.REACT_WEBPACK_ENV = env;
 var entryDir = path.join(__dirname, '/web/app');
 var base = {
-  entry: { monitor: entryDir + '/monitor' },
+  entry: { 
+    monitor: entryDir + '/monitor',
+    install: entryDir + '/install'
+  },
   output: {
     path: 'web/build',
     filename: '[name].js',
@@ -28,7 +31,8 @@ var base = {
     ],
     alias: {
       components: entryDir + '/components',
-      monitor: entryDir + '/monitor'
+      monitor: entryDir + '/monitor',
+      install: entryDir + '/install'
     }
   },
   module: {
@@ -86,6 +90,9 @@ var base = {
       rewrites: [{
           from: /\/monitor/,
           to: '/monitor.html'
+        }, {
+          from: /\/install/,
+          to: '/install.html'
         }]
     }
   }
