@@ -1,19 +1,18 @@
 .form-header {
 	text-align: center;
-	margin: 20px 0;
 	font-size: 30px;
 }
-.form-top-content {
-	text-align: center;
-}
+.form-top-content,
+.form-middle-content,
 .form-bottom-content {
 	margin-top: 50px;
 	text-align: center;
 }
 .form-submit-btn {
 	position: absolute;
+	width: 200px;
 	left: 50%;
-	margin-left: -40px;
+	margin-left: -100px;
 	margin-top: 40px;
 }
 .ant-form-item {

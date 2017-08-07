@@ -16,3 +16,4 @@ coverage
 build/Release
 node_modules
 bower_components/
+/service/init/db-config.js

@@ -5,7 +5,6 @@ const init = require('./service/init/init');
 const schedule = require('node-schedule');
 var cors = require('cors');
 const path = require('path');
-
 const app = express();
 
 const port = 3000;
