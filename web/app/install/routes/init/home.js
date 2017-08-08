@@ -1,9 +1,8 @@
 import React from 'react';
-import { Form, Input, Button } from 'antd';
-import 'antd/dist/antd.css';
-import './style.css';
-const FormItem = Form.Item;
 import reqwest from 'reqwest';
+import { Form, Input, Button } from 'antd';
+import './style.scss';
+const FormItem = Form.Item;
 
 class RegistrationForm extends React.Component {
   state = {
@@ -17,7 +16,11 @@ class RegistrationForm extends React.Component {
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
       	this.requestInit(values).
-      	then(res=>console.log(res));
+      		then(res=>{
+      			if(res.errno == 0) {
+      				this.props.history.push('/project')
+      			}
+      		}).catch(e=>console.log(e));
       }
     });
   }
@@ -35,7 +38,7 @@ class RegistrationForm extends React.Component {
     const { getFieldDecorator } = this.props.form;
 
     return (
-    	<div>
+    	<div className="init-mysql">
 	      <Form onSubmit={this.handleSubmit} layout="inline">
 	        <div className="form-top-content">
 	        	<h3 className="form-header">管理账号信息</h3>
@@ -77,6 +80,7 @@ class RegistrationForm extends React.Component {
 		              required: true,
 		              message: '请输入MySQL账号'
 		            }],
+		            initialValue: 'root'
 		          })(
 		            <Input autoComplete={'off'} placeholder="数据库账号"/>
 		          )}
@@ -90,6 +94,7 @@ class RegistrationForm extends React.Component {
 		              required: true,
 		              message: '请输入MySQL主机名'
 		            }],
+		            initialValue: '127.0.0.1'
 		          })(
 		            <Input autoComplete={'off'} placeholder="数据库主机地址" />
 		          )}
@@ -103,6 +108,7 @@ class RegistrationForm extends React.Component {
 		              required: true,
 		              message: '请输入MySQL密码'
 		            }],
+		            initialValue: 'lipuyang1996'
 		          })(
 		            <Input type="password" autoComplete={'off'} placeholder="数据库密码" />
 		          )}
@@ -115,7 +121,8 @@ class RegistrationForm extends React.Component {
 		            rules: [{
 		              required: true,
 		              message: '请输入MySQL端口'
-		            }]
+		            }],
+		            initialValue: '3306'
 		          })(
 		            <Input autoComplete={'off'} placeholder="数据库端口" />
 		          )}
@@ -128,7 +135,8 @@ class RegistrationForm extends React.Component {
 		            rules: [{
 		              required: true,
 		              message: '请输入MySQL数据库名'
-		            }]
+		            }],
+		            initialValue: 'think-monitor'
 		          })(
 		            <Input autoComplete={'off'} placeholder="数据库名" />
 		          )}
@@ -146,6 +154,7 @@ class RegistrationForm extends React.Component {
 		              required: true,
 		              message: '请输入influxDB主机名'
 		            }],
+		            initialValue: '127.0.0.1'
 		          })(
 		            <Input autoComplete={'off'} placeholder="数据库主机地址" />
 		          )}
@@ -158,26 +167,14 @@ class RegistrationForm extends React.Component {
 		            rules: [{
 		              required: true,
 		              message: '请输入influxDB端口'
-		            }]
+		            }],
+		            initialValue: '8086'
 		          })(
 		            <Input autoComplete={'off'} placeholder="数据库端口" />
 		          )}
-		        </FormItem>	 
-						<FormItem
-			          label="数据库名"
-			          hasFeedback
-		        >
-		          {getFieldDecorator('influx_database', {
-		            rules: [{
-		              required: true,
-		              message: '请输入influxDB数据库名'
-		            }]
-		          })(
-		            <Input autoComplete={'off'} placeholder="数据库名" />
-		          )}
 		        </FormItem>
 	      	</div>
-          <Button type="primary" htmlType="submit" className="form-submit-btn">开始安装</Button>
+          <Button type="primary" htmlType="submit" className="form-submit-btn">开始配置MySQL</Button>
 	      </Form>	      
     	</div>
     );

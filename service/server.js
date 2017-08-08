@@ -2,8 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const influx = require('./influx');
 const schedule = require('node-schedule');
-var cors = require('cors');
-
+const cors = require('cors');
 const app = express();
 
 const port = 3000;

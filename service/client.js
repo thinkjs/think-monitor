@@ -19,8 +19,6 @@ errorCallback = ()=>{
   }
 }
 
-
-
 module.exports = function({hash, interval=1000, batch=10}) {
   var host = os.hostname();
   var pid = process.pid;
@@ -29,7 +27,7 @@ module.exports = function({hash, interval=1000, batch=10}) {
   var time = Date.now();
   setInterval(()=>{
     var time_diff = Date.now() - time;
-    time+= time_diff;
+    time += time_diff;
 
     var diffCpuUsage = process.cpuUsage(cpuUsage);
     cpuUsage = process.cpuUsage();

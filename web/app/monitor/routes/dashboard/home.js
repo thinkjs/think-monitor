@@ -1,12 +1,13 @@
 import React from 'react';
 import './style.scss';
 import reqwest from 'reqwest';
-import { Row, Col, DatePicker, Button } from 'antd';
+import { Row, Col, DatePicker, Button, Select } from 'antd';
 import moment from 'moment';
 import {quickSelects, intervals} from './config';
 const { RangePicker } = DatePicker;
 const ReactHighcharts = require('react-highcharts');
 const Highcharts = ReactHighcharts.Highcharts;
+const Option = Select.Option;
 import RBRadioGroup from 'rb-component/lib/rb-radio-group';
 Highcharts.setOptions({
   global: {
@@ -76,7 +77,8 @@ const createConfig = (title, unit, series, chartLoaded)=>({
 export default class extends React.Component {
   state = {
     interval: intervals[0],
-    dynamic: false
+    dynamic: false,
+    projectList: []
   }
 
   componentWillMount() {
@@ -97,13 +99,19 @@ export default class extends React.Component {
     return series.tags.pid + (isMaster ? ' (master)' : '');
   }
 
-  loadData = ()=>{
+  loadProject = ()=>{
+    this.requestProject()
+      .then(res=>this.setState({projectList: res}));
+  }
+
+  loadData = (hash)=>{
     if(!this.state.range) return;
     var [start, end] = this.state.range;
     this.requestProcess({
       startTime: start.valueOf(),
       endTime: end.valueOf(),
-      interval: this.state.interval[0]
+      interval: this.state.interval[0],
+      hash
     })
     .then(this.extractSeries)
     .then(({cpuSeries, memSeries})=>{
@@ -114,6 +122,7 @@ export default class extends React.Component {
   }
 
   extractSeries = (resp)=> {
+    if(!resp.results)return null;
     var series = resp.results[0].series;
     if(!Array.isArray(series)) return {};
 
@@ -196,6 +205,15 @@ export default class extends React.Component {
     })
   }
 
+  requestProject = (data={})=>{
+    return reqwest({
+      url: '/projectList',
+      method: 'get',
+      crossOrigin: true,
+      data
+    })
+  }
+
   getLastPointX = ()=> {
     var series = this.memChart.series;
     if(series.length === 0) return null;
@@ -211,7 +229,12 @@ export default class extends React.Component {
 
   handleClickQuickSelect = value=>{
     var range = [moment(Date.now() - value), moment()];
-    this.setState({range}, this.loadData);
+    //this.setState({range}, this.loadData);
+    this.setState({range}, this.loadProject);
+  }
+
+  handleChangeProject = (hash) => {
+    this.loadData(hash);
   }
 
   render() {
@@ -245,6 +268,14 @@ export default class extends React.Component {
               checkedValue={this.state.dynamic}
               onChange={dynamic=>this.setState({dynamic}, this.loadData)}
           />
+        </div>
+        <div className="dashboard-page__criteria">
+          <label>项目选择：</label>
+          <Select style={{ width: 200 }} showSearch onChange={this.handleChangeProject}>
+            {this.state.projectList.map((item, index)=>{
+              return <Option key={index} value={item.hash}>{item.name}</Option>
+            })}
+          </Select>
         </div>
         <div>
           <Row>
