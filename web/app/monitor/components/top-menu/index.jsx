@@ -19,7 +19,7 @@ export default class extends Component {
   render () {
     return (
       <header className="top-menu-component">
-        <div className="top-menu__logo">dashboard</div>
+        <div className="top-menu__logo">think-monitor</div>
         <div className="top-menu__content">
           {this.props.menus.map((item, i) =>
             <div key={i} className="top-menu__content__menu">

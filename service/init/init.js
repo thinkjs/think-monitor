@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql');
+const Bluebird = require('bluebird');
 
-const updateConfig = (data) => {
+exports.updateConfig = function(data){
 	let config = {
 			mysql: {
 		    host: data.mysql_host,
@@ -26,7 +27,7 @@ const updateConfig = (data) => {
 };
 
 
-const initMySQL = async ({mysql_user, mysql_host, mysql_password, mysql_port, mysql_database}) => {
+exports.initMySQL = async function({mysql_user, mysql_host, mysql_password, mysql_port, mysql_database, user_account, user_password}) {
 	try{
 		let connection = mysql.createConnection({
 		  host     : mysql_host,
@@ -36,9 +37,9 @@ const initMySQL = async ({mysql_user, mysql_host, mysql_password, mysql_port, my
 		});
 
 		connection.connect();
-
-		await connection.query("CREATE DATABASE `" + mysql_database + "`");
-		await connection.query("USE `" + mysql_database + "`");
+		connection = Bluebird.promisifyAll(connection);
+		await connection.queryAsync("CREATE DATABASE `" + mysql_database + "`");
+		await connection.queryAsync("USE `" + mysql_database + "`");
 
 		let mysqlFile = path.join(path.resolve('./service/init'), 'mysql-script.sql');
 		let content = fs.readFileSync(mysqlFile, 'utf8');
@@ -47,21 +48,13 @@ const initMySQL = async ({mysql_user, mysql_host, mysql_password, mysql_port, my
 	  for(let item of content) {
 	    item = item.trim();
 	    if(item) {
-	      await connection.query(item);
+	      await connection.queryAsync(item);
 	    }
 	  }
+		let userAddSql = 'INSERT INTO monitor_user(user_id, username, password, permisson_level) VALUES(0,?,?,?)';
+		let userAddSql_Params = [user_account, user_password, true];
+		await connection.queryAsync(userAddSql, userAddSql_Params);
 	}catch(e) {
 		console.log(e);
 	}
 };
-
-exports.init = function(data){
-  let {mysql_user, mysql_host, mysql_password, mysql_port, mysql_database, influx_host, influx_port} = data;
-	updateConfig(data);
-	initMySQL({mysql_user, mysql_host, mysql_password, mysql_port, mysql_database});
-
-	return {
-		errno: 0,
-		message: 'success'
-	}
-}

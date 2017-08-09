@@ -3,7 +3,6 @@ global.React = React;
 import {render} from 'react-dom';
 import {Router} from 'react-router';
 import RBAuthRoute from 'components/auth-route';
-
 import { useRouterHistory } from 'react-router';
 import { createHistory } from 'history';
 
@@ -17,7 +16,9 @@ const rootRoute = RBAuthRoute({
   chunkLoader(cb) {
     cb(
       require('./home'),
-      require('./routes/dashboard/index')
+      require('./routes/dashboard'),
+      require('./routes/project'),
+      require('./routes/user')
     );
   }
 });

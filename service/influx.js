@@ -1,5 +1,5 @@
 const Influx = require('influx');
-const dbConfig = require('./init/db-config');
+
 
 const MEASUREMENT = 'perf';
 const FIELDS = {
@@ -27,6 +27,7 @@ function pickValues(point, names) {
 }
 
 exports.connectInflux = function(dbName) {
+  const dbConfig = require('./init/db-config');
   const influx = new Influx.InfluxDB({
    host: dbConfig['influxDB'].influx_host,
    database: dbName,

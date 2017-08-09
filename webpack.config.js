@@ -15,7 +15,7 @@ var entryDir = path.join(__dirname, '/web/app');
 var base = {
   entry: { 
     monitor: entryDir + '/monitor',
-    install: entryDir + '/install'
+    init: entryDir + '/init'
   },
   output: {
     path: 'web/build',
@@ -32,7 +32,7 @@ var base = {
     alias: {
       components: entryDir + '/components',
       monitor: entryDir + '/monitor',
-      install: entryDir + '/install'
+      init: entryDir + '/init'
     }
   },
   module: {
@@ -91,8 +91,8 @@ var base = {
           from: /\/monitor/,
           to: '/monitor.html'
         }, {
-          from: /\/install/,
-          to: '/install.html'
+          from: /\/init/,
+          to: '/init.html'
         }]
     }
   }

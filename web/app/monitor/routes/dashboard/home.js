@@ -78,11 +78,14 @@ export default class extends React.Component {
   state = {
     interval: intervals[0],
     dynamic: false,
-    projectList: []
+    projectList: [],
+    hash: '',
+    isEmpty: false
   }
 
   componentWillMount() {
-    this.handleClickQuickSelect(900000); // 15分钟
+    this.loadProject();
+    this.setState({range: [moment(Date.now() - 900000), moment()]});
   }
 
   indexOf = (columns, name)=>{
@@ -101,10 +104,10 @@ export default class extends React.Component {
 
   loadProject = ()=>{
     this.requestProject()
-      .then(res=>this.setState({projectList: res}));
+      .then(data=>this.setState({projectList: data.projects}));
   }
 
-  loadData = (hash)=>{
+  loadData = (hash=this.state.hash)=>{
     if(!this.state.range) return;
     var [start, end] = this.state.range;
     this.requestProcess({
@@ -118,11 +121,15 @@ export default class extends React.Component {
       var cpuConfig = createConfig('进程 cpu 使用率', '%', cpuSeries, cpuChart=>this.cpuChart = cpuChart);
       var memConfig = createConfig('进程内存使用', 'MB', memSeries, memChart=>this.memChart = memChart);
       this.setState({cpuConfig, memConfig}, this.dynamicLoad);
-    });
+    }).catch(e=>console.log(e.message));
   }
 
   extractSeries = (resp)=> {
-    if(!resp.results)return null;
+    if(!resp.results) {
+      this.setState({isEmpty: true});
+      return {};
+    }
+    this.setState({isEmpty: false});
     var series = resp.results[0].series;
     if(!Array.isArray(series)) return {};
 
@@ -155,7 +162,8 @@ export default class extends React.Component {
       this.requestProcess({
         startTime: lastPointX,
         endTime: Date.now(),
-        interval: this.state.interval[0]
+        interval: this.state.interval[0],
+        hash: this.state.hash
       }).then(this.extractSeries).then(({cpuSeries, memSeries})=>{
 
         if(memSeries && this.memChart.series) {
@@ -215,8 +223,9 @@ export default class extends React.Component {
   }
 
   getLastPointX = ()=> {
+    if(!this.memChart) return null;
     var series = this.memChart.series;
-    if(series.length === 0) return null;
+    if(!series || series.length === 0) return null;
     var xData = series[series.length - 1].xData;
     if(xData.length) {
       return xData[xData.length - 1];
@@ -228,13 +237,13 @@ export default class extends React.Component {
   }
 
   handleClickQuickSelect = value=>{
+    if(!this.state.projectList) return;
     var range = [moment(Date.now() - value), moment()];
-    //this.setState({range}, this.loadData);
-    this.setState({range}, this.loadProject);
+    this.setState({range}, this.loadData);
   }
 
   handleChangeProject = (hash) => {
-    this.loadData(hash);
+    this.setState({hash}, this.loadData);
   }
 
   render() {
@@ -273,15 +282,18 @@ export default class extends React.Component {
           <label>项目选择：</label>
           <Select style={{ width: 200 }} showSearch onChange={this.handleChangeProject}>
             {this.state.projectList.map((item, index)=>{
-              return <Option key={index} value={item.hash}>{item.name}</Option>
+              return <Option key={index} value={item.hash}>{item.project_name}</Option>
             })}
           </Select>
         </div>
         <div>
-          <Row>
-            <Col span={12}>{this.state.cpuConfig && <ReactHighcharts isPureConfig config={this.state.cpuConfig}/>}</Col>
-            <Col span={12}>{this.state.memConfig && <ReactHighcharts isPureConfig config={this.state.memConfig}/>}</Col>
-          </Row>
+          {
+            this.state.isEmpty ? <div className="dashboard-page__empty">暂无数据</div>
+            : <Row>
+                <Col span={12}>{this.state.cpuConfig && <ReactHighcharts isPureConfig config={this.state.cpuConfig}/>}</Col>
+                <Col span={12}>{this.state.memConfig && <ReactHighcharts isPureConfig config={this.state.memConfig}/>}</Col>
+              </Row>
+          }
         </div>
       </div>
     );

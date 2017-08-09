@@ -4,7 +4,20 @@ import 'antd/dist/antd.css';
 import TopMenu from 'monitor/components/top-menu';
 
 export default class extends Component {
-  state = {menus: []};
+  state = {menus: [
+    {
+      to: '/dashboard',
+      label: '监控面板'
+    },
+    {
+      to: '/user',
+      label: '用户管理'
+    },
+    {
+      to: '/project',
+      label: '项目管理'
+    }
+  ]};
   render() {
     return (
       <div>

@@ -2,9 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Influx = require('influx');
 const mysql = require('mysql');
-const dbConfig = require('./db-config');
 const uuid = require('uuid');
-const Bluebird = require('bluebird');
 const MEASUREMENT = 'perf';
 
 const FIELDS = {
@@ -21,18 +19,6 @@ const TAGS = [
   'hash', 'host', 'pid'
 ];
 
-let mysqlConfig = dbConfig['mysql'];
-let {host, user, password, port, database} = mysqlConfig;
-let connection = mysql.createConnection({
-  host,
-  user,
-  password,
-  port,
-  database
-});
-connection.connect();
-global.db = Bluebird.promisifyAll(connection);
-
 const initInfluxDB = async ({influx_host, influx_port, influx_name}) => {
 	try {
 		const influx = new Influx.InfluxDB({
@@ -46,11 +32,22 @@ const initInfluxDB = async ({influx_host, influx_port, influx_name}) => {
 	}
 };
 
-const insertMySQL = async (hash, name) => {
+const insertToMySQL = async (hash, name) => {
 	try {
-		let projectAddSql = 'INSERT INTO monitor_project(id, hash, name) VALUES(0,?,?)';
+		// 将这个项目插入到project表
+		let projectAddSql = 'INSERT INTO monitor_project(project_id, hash, project_name) VALUES(0,?,?)';
 		var projectAddSql_Params = [hash, name];
-		await connection.query(projectAddSql, projectAddSql_Params);
+		global.db.queryAsync(projectAddSql, projectAddSql_Params);
+
+		// 取出所有管理员
+		let admins = await global.db.queryAsync('SELECT `user_id` FROM `monitor_user` WHERE `permisson_level`="1"');
+		let project = await global.db.queryAsync('SELECT `project_id` FROM `monitor_project` WHERE `hash`="'+ hash +'"');
+		// 将每个管理员和这个project的对应关系插入到up表。
+		admins.forEach((item) => {
+			let upAddSql = 'INSERT INTO user_project(up_id, user_id, project_id) VALUES(0,?,?)';
+			let upAddSql_Params = [item.user_id, project[0].project_id];			
+			global.db.queryAsync(upAddSql, upAddSql_Params);
+		})
 	}catch(e) {
 		console.log(e);
 	}
@@ -58,11 +55,12 @@ const insertMySQL = async (hash, name) => {
 
 exports.initProject = function(data){
   let {influx_name} = data;
+  let dbConfig = require('./db-config');
   let influxConfig = dbConfig['influxDB'];
   let {influx_host, influx_port} = influxConfig;
 	initInfluxDB({influx_host, influx_port, influx_name});
 	let hash = uuid.v4();
-	insertMySQL(hash, influx_name);
+	insertToMySQL(hash, influx_name);
 
 	return {
 		errno: 0,

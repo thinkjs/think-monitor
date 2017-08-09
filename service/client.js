@@ -19,7 +19,7 @@ errorCallback = ()=>{
   }
 }
 
-module.exports = function({hash, interval=1000, batch=10}) {
+module.exports = function({hostname, port, hash, interval=1000, batch=10}) {
   var host = os.hostname();
   var pid = process.pid;
   var cpuUsage = process.cpuUsage();
@@ -44,7 +44,7 @@ module.exports = function({hash, interval=1000, batch=10}) {
     };
     data.points.push(metric);
     if(data.points.length === batch) {
-      send(data, endCallback, errorCallback);
+      send(data, endCallback, errorCallback, hostname, port);
       data.points = [];
     }
   }, interval);

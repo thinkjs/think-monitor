@@ -1,11 +1,10 @@
 const http = require('http');
 
-module.exports = function(data, endCallback=new Function, errorCallback=new Function) {
+module.exports = function(data, endCallback=new Function, errorCallback=new Function, hostname, port) {
   data = JSON.stringify(data);
-
   var options = {
-    hostname: 'localhost',
-    port: 3000,
+    hostname: hostname,
+    port: port,
     path: '/add',
     method: 'POST',
     headers: {
