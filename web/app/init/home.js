@@ -107,8 +107,7 @@ class Init extends React.Component {
 		            rules: [{
 		              required: true,
 		              message: '请输入MySQL密码'
-		            }],
-		            initialValue: 'lipuyang1996'
+		            }]
 		          })(
 		            <Input type="password" autoComplete={'off'} placeholder="数据库密码" />
 		          )}
