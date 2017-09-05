@@ -11,17 +11,18 @@ if (allowedEnvs.indexOf(env) === -1) {
   env = 'dev';
 }
 process.env.REACT_WEBPACK_ENV = env;
-var entryDir = path.join(__dirname, '/web/app');
+var base = path.join(__dirname, '/www/static');
+var entryDir = path.join(base, 'src');
 var base = {
   entry: { 
     monitor: entryDir + '/monitor',
-    init: entryDir + '/init'
+    install: entryDir + '/install'
   },
   output: {
-    path: 'web/build',
+    path: path.join(base, 'js'),
     filename: '[name].js',
     chunkFilename: '[id].chunk.js',
-    publicPath: '/web/build/'
+    publicPath: '/static/js/'
   },
   resolve: {
     extensions: [
@@ -32,7 +33,7 @@ var base = {
     alias: {
       components: entryDir + '/components',
       monitor: entryDir + '/monitor',
-      init: entryDir + '/init'
+      install: entryDir + '/install'
     }
   },
   module: {
@@ -50,7 +51,7 @@ var base = {
       },
       {
         test: /\.css$/,
-        loader: 'style-loader!css-loader!postcss-loader'
+        loader: 'style-loader!css-loader?sourceMap!postcss-loader'
       },
       {
         test: /\.sass/,
@@ -100,7 +101,7 @@ var base = {
 var configs = {};
 configs.dev = _.merge({
   cache: true,
-  devtool: 'inline-source-map'
+  devtool: 'eval'
 }, base);
 configs.dist = _.merge({
   cache: false,
