@@ -38,7 +38,7 @@ module.exports = class extends think.Controller {
       connection = bluebird.promisifyAll(connection);
       await connection.queryAsync("CREATE DATABASE `" + mysql_database + "`");
       await connection.queryAsync("USE `" + mysql_database + "`");
-      let content = fs.readFileSync('./script.sql', 'utf8');
+      let content = fs.readFileSync(path.join(think.ROOT_PATH, 'mysql.sql'), 'utf8');
 
       content = content.split(';');
       for (let item of content) {
@@ -47,7 +47,7 @@ module.exports = class extends think.Controller {
           await connection.queryAsync(item);
         }
       }
-      let userAddSql = 'INSERT INTO monitor_user(user_id, username, password, permisson_level) VALUES(0,?,?,?)';
+      let userAddSql = 'INSERT INTO user(id, username, password, permisson_level) VALUES(0,?,?,?)';
       let userAddSql_Params = [user_account, user_password, true];
       await connection.queryAsync(userAddSql, userAddSql_Params);
     } catch (e) {
