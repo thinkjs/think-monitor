@@ -1,8 +1,8 @@
 {
   "apps": [{
-    "name": "E:projectthinkjsE:projectthinkjsthink-monitor",
+    "name": "think-monitor",
     "script": "production.js",
-    "cwd": "E:\project\thinkjs\think-monitor",
+    "cwd": "E:\\project\\think-monitor",
     "exec_mode": "fork",
     "max_memory_restart": "1G",
     "autorestart": true,
