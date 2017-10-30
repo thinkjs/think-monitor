@@ -1,13 +1,12 @@
-// const { getInstallSettings } = require('./install_settings');
-
 module.exports = class extends think.Controller {
   async __before() {
-    // if (this.ctx.url === '/install') {
-    //   return;
-    // }
-    // var settings = await getInstallSettings();
-    // if (!settings) {
-    //   return this.redirect('/install');
-    // }
+    // 判断系统是否安装
+    const hasInstalled = this.ctx.hasInstalled;
+    if (!hasInstalled) {
+      return this.redirect('/install');
+    }
+    if (hasInstalled && this.ctx.url === '/install') {
+      return this.redirect('/console');
+    }
   }
 };

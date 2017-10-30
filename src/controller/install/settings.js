@@ -17,7 +17,7 @@ module.exports = {
       think.installSettings = settings;
       return settings;
     } catch (e) {
-      think.installSettings === false;
+      think.installSettings = false;
     }
     return null;
   },

@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql');
 const bluebird = require('bluebird');
-const { setInstallSettings, getInstallSettings } = require('../install_settings');
+// const { setInstallSettings, getInstallSettings } = require('../install_settings');
 
 module.exports = class extends think.Controller {
   async indexAction() {
