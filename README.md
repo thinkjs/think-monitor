@@ -1,22 +1,30 @@
 
-Application created by [ThinkJS](http://www.thinkjs.org)
+Think-Monitor created by [ThinkJS](http://www.thinkjs.org)
 
 ## Install dependencies
 
-```
-npm install
+```bash
+cnpm install or qnpm install
 ```
 
-## Start server
+## Start develop
 
+```bash
+npm run dev
 ```
+
+## start production
+
+```bash
 npm start
 ```
 
-## Deploy with pm2
+## Debug
 
-Use pm2 to deploy app on production enviroment.
+```bash
+npm run debug
+```
 
-```
-pm2 startOrReload pm2.json
-```
+## Env
+
+nodeJS: 8.8.1

@@ -1,2 +1,1 @@
-// default config
 module.exports = {};
