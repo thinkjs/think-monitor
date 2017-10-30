@@ -1,0 +1,15 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "node": true,
+    "mocha": true,
+    "browser": true
+  },
+  "plugins": [
+    "vue"
+  ],
+  "rules": {
+    "no-undef": 1,
+    "no-unused-vars": 1
+  }
+}
