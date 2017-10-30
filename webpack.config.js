@@ -1,53 +1,34 @@
-var path = require('path');
-var args = require('minimist')(process.argv.slice(2));
-var webpack = require('webpack');
-var _ = require('lodash');
-var allowedEnvs = [
-  'dev',
-  'dist'
-];
-var env = args.env;
-if (allowedEnvs.indexOf(env) === -1) {
-  env = 'dev';
-}
-process.env.REACT_WEBPACK_ENV = env;
-var base = path.join(__dirname, '/www/static');
-var entryDir = path.join(base, 'src');
-var base = {
-  entry: { 
+var path = require('path')
+var webpack = require('webpack')
+var HtmlWebpackPlugin = require('html-webpack-plugin')
+
+var base = __dirname;
+var entryDir = path.join(base, '/fesrc');
+module.exports = {
+  entry: {
     monitor: entryDir + '/monitor',
     install: entryDir + '/install'
   },
   output: {
-    path: path.join(base, 'js'),
+    path: path.join(base, '/www/static'),
+    // publicPath: path.join(base, '/www/static'),
     filename: '[name].js',
-    chunkFilename: '[id].chunk.js',
-    publicPath: '/static/js/'
-  },
-  resolve: {
-    extensions: [
-      '',
-      '.js',
-      '.jsx'
-    ],
-    alias: {
-      components: entryDir + '/components',
-      monitor: entryDir + '/monitor',
-      install: entryDir + '/install'
-    }
+    chunkFilename: '[id].chunk.js'
   },
   module: {
-    preLoaders: [{
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        loader: 'eslint-loader'
-      }],
-    loaders: [
-      {
-        test: /\.(js|jsx)$/,
-        loader: 'babel-loader',
-        include: entryDir,
-        exclude: /node_modules/
+    rules: [{
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        options: {
+          loaders: {
+            // Since sass-loader (weirdly) has SCSS as its default parse mode, we map
+            // the "scss" and "sass" values for the lang attribute to the right configs here.
+            // other preprocessors should work out of the box, no loader config like this necessary.
+            'scss': 'vue-style-loader!css-loader!sass-loader',
+            'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax'
+          }
+          // other vue-loader options go here
+        }
       },
       {
         test: /\.css$/,
@@ -70,47 +51,71 @@ var base = {
         loader: 'style-loader!css-loader!stylus-loader'
       },
       {
-        test: /\.(png|jpg|gif|ttf|eot|svg|woff|woff2)$/,
-        loader: 'url-loader?name=[path][name].[ext]&limit=200000'
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/
       },
       {
-        test: /environment\.bin?$/,
-        loader: 'imports-loader?environment=>"' + env + '"',
-        exclude: /node_modules/
+        test: /\.(png|jpg|gif|ttf|eot|svg|woff|woff2)$/,
+        loader: 'url-loader?name=[path][name].[ext]&limit=200000'
       }
     ]
   },
-  postcss: function () {
-    return [];
-  },
-  plugins: [],
-  devServer: {
-    port: 8361,
-    index: 'monitor.html',
-    historyApiFallback: {
-      rewrites: [{
-          from: /\/monitor/,
-          to: '/monitor.html'
-        }, {
-          from: /\/init/,
-          to: '/init.html'
-        }]
+  resolve: {
+    alias: {
+      'vue$': 'vue/dist/vue.esm.js'
     }
-  }
-};
-var configs = {};
-configs.dev = _.merge({
-  cache: true,
-  devtool: 'eval'
-}, base);
-configs.dist = _.merge({
-  cache: false,
-  devtool: 'sourcemap',
+  },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin(),
-    new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.optimize.AggressiveMergingPlugin(),
-    new webpack.NoErrorsPlugin()
-  ]
-}, base);
-module.exports = configs[env];
+    new HtmlWebpackPlugin({
+      filename: 'install.html',
+      template: './view/install_index.html',
+      inject: 'body',
+      minify: {
+        removeComments: true
+      },
+      chunks: ['install']
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'monitor.html',
+      template: './view/monitor_index.html',
+      inject: 'body',
+      minify: {
+        removeComments: true
+      },
+      chunks: ['monitor']
+    })
+  ],
+  devServer: {
+    historyApiFallback: true,
+    contentBase: path.join(base, '/www/static'),
+    noInfo: true,
+    overlay: true,
+    openPage: "install.html",
+  },
+  performance: {
+    hints: false
+  },
+  devtool: '#eval-source-map'
+}
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports.devtool = '#source-map'
+  // http://vue-loader.vuejs.org/en/workflow/production.html
+  module.exports.plugins = (module.exports.plugins || []).concat([
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: '"production"'
+      }
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+      sourceMap: false,
+      compress: {
+        warnings: false
+      }
+    }),
+    new webpack.LoaderOptionsPlugin({
+      minimize: true
+    })
+  ])
+}
