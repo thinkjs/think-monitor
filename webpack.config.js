@@ -91,7 +91,7 @@ module.exports = {
     contentBase: path.join(base, '/www/static'),
     noInfo: true,
     overlay: true,
-    openPage: "install.html",
+    openPage: "monitor.html",
   },
   performance: {
     hints: false
