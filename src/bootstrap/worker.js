@@ -18,4 +18,4 @@ const options = {
 };
 
 // think.agent = new Agent(options);
-agentFn(options)();
+// agentFn(options)();

@@ -37,8 +37,9 @@ exports.model = {
   },
   mysql: {
     handle: mysql,
-    prefix: 'tm_',
-    encoding: 'utf8',
+    encoding: 'utf-8',
+    database: '',
+    prefix: '',
     dateStrings: true
   }
 };
