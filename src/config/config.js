@@ -1,2 +1,4 @@
 // default config
-module.exports = {};
+module.exports = {
+  workers: 2
+};

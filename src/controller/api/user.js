@@ -1,4 +1,4 @@
-const BaseRest = require('./rest.js');
+const BaseRest = require('./base');
 
 module.exports = class extends BaseRest {
 

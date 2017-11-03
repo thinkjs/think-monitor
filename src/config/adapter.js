@@ -5,6 +5,8 @@ const mysql = require('think-model-mysql');
 const path = require('path');
 const isDev = think.env === 'development';
 
+const ON_DAY_MILLIONSECONDS = 24 * 3600 * 1000;
+
 /**
  * cache adapter config
  * @type {Object}
@@ -18,7 +20,7 @@ exports.cache = {
     handle: fileCache,
     cachePath: path.join(think.ROOT_PATH, 'runtime/cache'), // absoulte path is necessarily required
     pathDepth: 1,
-    gcInterval: 24 * 60 * 60 * 1000 // gc interval
+    gcInterval: ON_DAY_MILLIONSECONDS // gc interval
   }
 };
 
@@ -35,13 +37,9 @@ exports.model = {
   },
   mysql: {
     handle: mysql,
+    encoding: 'utf-8',
     database: '',
-    prefix: 'think_',
-    encoding: 'utf8',
-    host: '127.0.0.1',
-    port: '',
-    user: 'root',
-    password: 'root',
+    prefix: '',
     dateStrings: true
   }
 };
@@ -54,9 +52,10 @@ exports.session = {
   type: 'file',
   common: {
     cookie: {
-      name: 'thinkjs'
-      // keys: ['werwer', 'werwer'],
-      // signed: true
+      name: 'thinkjs',
+      keys: ['thinkjs', 'monitor'],
+      signed: true,
+      maxAge: ON_DAY_MILLIONSECONDS
     }
   },
   file: {
