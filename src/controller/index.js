@@ -11,18 +11,16 @@ module.exports = class extends Base {
   }
   async installAction() {
     if (this.isGet) {
-      if (this.ctx.hasInstalled) {
+      if (this.ctx.checkInstalled) {
         return this.redirect('/');
       }
       return this.display();
     }
-
-    if (this.ctx.hasInstalled) {
+    if (this.ctx.checkInstalled) {
       // 208 aready reported
       this.status = 208;
       return this.fail('system hasInstalled');
     }
-
     const dataKeys = [
       'username',
       'password',
@@ -68,22 +66,20 @@ module.exports = class extends Base {
     if (think.isError(mysqlResult)) {
       return this.fail(mysqlResult.message);
     }
-
     // 将用户添加到用户表中，并给予权限
-    // MysqlService.setModelAdapter(mysqlConf);
-    // const userModel = this.model('user');
-    // const datetime = think.datetime(new Date());
-    // const adminInfo = Object.assign({}, userConf, {
-    //   is_admin: 3,
-    //   create_time: datetime,
-    //   last_login: datetime,
-    //   login_ip: this.ctx.ip,
-    //   enable: 1
-    // });
-    // await userModel.add(adminInfo);
-
+    MysqlService.setModelAdapter(mysqlConf);
+    const userModel = this.model('user');
+    const datetime = think.datetime(new Date());
+    const adminInfo = Object.assign({}, userConf, {
+      is_admin: 3,
+      create_time: datetime,
+      last_login: datetime,
+      login_ip: this.ctx.ip,
+      enable: 1
+    });
+    await userModel.add(adminInfo);
     // 将配置保存到文件中
-    const installSetting = { user: userConf, mysql: mysqlConf, influx: influxConf };
+    const installSetting = { mysql: mysqlConf, influx: influxConf };
     await writeFile(path.join(think.ROOT_PATH, '.install_setting'), JSON.stringify(installSetting));
     // 201 Created
     this.status = 201;
