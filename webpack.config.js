@@ -69,7 +69,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'install.html',
-      template: './view/install_index.html',
+      template: './view/index_install.html',
       inject: 'body',
       minify: {
         removeComments: true
@@ -78,7 +78,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       filename: 'monitor.html',
-      template: './view/monitor_index.html',
+      template: './view/index_monitor.html',
       inject: 'body',
       minify: {
         removeComments: true
