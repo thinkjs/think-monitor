@@ -5,7 +5,6 @@ module.exports = class extends Base {
     return this.display();
   }
   async installAction() {
-    const instance = this.service('install', this.ip);
     if (this.isGet) {
       if (this.ctx.hasInstalled) {
         return this.redirect('/');
@@ -28,41 +27,41 @@ module.exports = class extends Base {
       'db_account',
       'db_password',
       'db_table_prefix',
+      'influx_name',
       'influx_host',
       'influx_port'
     ];
     const post = this.post(dataKeys.join(','));
-    const userInfo = {
+    const userConf = {
       username: post.username,
       password: post.password
     };
-    const mysqlInfo = {
+    const mysqlConf = {
       host: post.db_host,
       port: post.db_port,
+      database: post.db_name,
       user: post.db_account,
       password: post.db_password,
       prefix: post.db_table_prefix
     };
-    const influxInfo = {
+    const influxConf = {
       host: post.influx_host,
-      port: post.influx_port
+      port: post.influx_port,
+      name: post.influx_name
     };
-    const checkMysql = await instance.checkMysql(mysqlInfo).catch(err => err);
-    if (think.isError(checkMysql)) {
+    const instance = this.service('install', mysqlConf, influxConf);
+    const checkResult = await instance.checkMysql();
+    if (think.isError(checkResult)) {
       return this.fail('请检查Mysql配置');
     }
-    const checkInflux = await instance.checkInflux(influxInfo).catch(err => err);
-    if (think.isError(checkInflux)) {
-      return this.fail('请检查Influx配置');
-    }
-    const promises = [
-      instance.saveUser(userInfo),
-      instance.saveMysql(mysqlInfo),
-      instance.saveInflux(influxInfo)
-    ];
-    const result = await Promise.all(promises).catch(err => err);
+    const promises = [instance.initMysql(), instance.initInflux()];
+    const result = await Promise.all(promises).catch(err => {
+      think.logger.error(err.message);
+      return err;
+    });
     if (think.isError(result)) {
-      this.fail('安装失败');
+      console.log(result);
+      return this.fail();
     }
     // 201 Created
     this.status = 201;
