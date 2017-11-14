@@ -1,7 +1,5 @@
 module.exports = class extends think.Logic {
-  indexAction() {
-
-  }
+  indexAction() {}
   installAction() {
     if (this.isGet) {
       return;
@@ -36,7 +34,6 @@ module.exports = class extends think.Logic {
         method: 'post'
       },
       db_table_prefix: {
-        required: true,
         method: 'post'
       },
       influx_host: {

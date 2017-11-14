@@ -1,49 +1,46 @@
-const _ = require('ramda');
 const fs = require('fs');
+const _ = require('ramda');
 const path = require('path');
-const influx = require('influx');
 const helper = require('think-helper');
 
 module.exports = class extends think.Service {
-  constructor(mysql, influx) {
-    super();
-    this.mysql = mysql;
-    this.influx = influx;
+  /**
+   * 设置数据库适配器
+   * @param {*} mysql - 数据库配置
+   */
+  static setModelAdapter(mysql) {
+    const modelAdapter = think.config('model');
+    const mysqlConfig = helper.parseAdapterConfig(modelAdapter);
+    modelAdapter.mysql = Object.assign({}, mysqlConfig, mysql);
+    think.config('model', modelAdapter);
+    return true;
   }
   /**
    * 获取数据库连接实例
    * @param {Object} mysql - default is `this.mysql`
    */
-  getInstance() {
-    const { host, port, user, password, encoding = 'utf8' } = this.mysql;
-    const modelAdapter = think.config('model');
-    const mysqlConfig = helper.parseAdapterConfig(modelAdapter);
-    modelAdapter.mysql = Object.assign({}, mysqlConfig, {
-      host,
-      port,
-      user,
-      password,
-      encoding
-    });
-    think.config('model', modelAdapter);
-    return this.model();
+  static getInstance(mysql) {
+    const { host, port, user, password, encoding = 'utf8' } = mysql;
+    this.setModelAdapter({ host, port, user, password, encoding });
+    return think.model();
   }
   /**
    * 目标服务器是否存在该数据库
    * @param {String} database - 数据库名
    */
-  async isDatabaseExist(database) {
-    const modelInstance = this.getInstance();
+  static async isDatabaseExist(mysql) {
+    const { database } = mysql;
+    const modelInstance = this.getInstance(mysql);
     const databases = await modelInstance.query('show databases;');
     const databaseNameList = databases.map(database => database['Database']);
     return databaseNameList.findIndex(item => item === database) > -1;
   }
   /**
-   * 检查mysql版本
+   * 获取目标服务器数据库应该设置的字符集
    * @param {*} mysql - 数据库配置
    */
-  async checkMysql() {
-    const modelInstance = this.getInstance();
+  static async getEncoding(mysql) {
+    const modelInstance = this.getInstance(mysql);
     const result = await modelInstance.query('select version();');
 
     let version;
@@ -53,19 +50,21 @@ module.exports = class extends think.Service {
     } else {
       version = result[0];
     }
-    this.mysql.encoding = _.gt(version, '5.5.3') ? 'utf8mb4' : 'utf-8';
-    return true;
+    return _.gt(version, '5.5.3') ? 'utf8mb4' : 'utf-8';
   }
   /**
    * 将sql写入到目标数据库
    */
-  async initMysql() {
-    const { database } = this.mysql;
-    const modelInstance = this.getInstance();
-    if (!await this.isDatabaseExist(database)) {
-      await modelInstance.query(`create database ${this.mysql.database};`);
+  static async initMysql(mysql) {
+    const { database, prefix } = mysql;
+    const modelInstance = this.getInstance(mysql);
+    if (await this.isDatabaseExist(mysql)) {
+      const err = new Error('存在此数据库');
+      return Promise.reject(err);
     }
+    await modelInstance.query(`create database ${database};`);
     await modelInstance.query(`use ${database};`);
+    // 创建时如何加上前缀？？
     const sqls = fs
       .readFileSync(path.join(__dirname, 'init.sql'), 'utf8')
       .replace(/\n/g, '')
@@ -76,8 +75,5 @@ module.exports = class extends think.Service {
     });
     const result = await Promise.all(promises);
     return result;
-  }
-  async initInflux() {
-    return true;
   }
 };

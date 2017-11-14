@@ -1,5 +1,3 @@
-const BaseRest = require('./base');
+const RestBase = require('./rest');
 
-module.exports = class extends BaseRest {
-
-};
+module.exports = class extends RestBase {};

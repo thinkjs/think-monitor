@@ -1,4 +1,9 @@
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
 const Base = require('./base.js');
+const MysqlService = require('../service/mysql');
+const writeFile = util.promisify(fs.writeFile);
 
 module.exports = class extends Base {
   indexAction() {
@@ -47,22 +52,39 @@ module.exports = class extends Base {
     const influxConf = {
       host: post.influx_host,
       port: post.influx_port,
-      name: post.influx_name
+      database: post.influx_name
     };
-    const instance = this.service('install', mysqlConf, influxConf);
-    const checkResult = await instance.checkMysql();
-    if (think.isError(checkResult)) {
+    // 根据数据库版本设置字符集
+    const encoding = await MysqlService.getEncoding(mysqlConf);
+    if (think.isError(encoding)) {
       return this.fail('请检查Mysql配置');
     }
-    const promises = [instance.initMysql(), instance.initInflux()];
-    const result = await Promise.all(promises).catch(err => {
+    mysqlConf.encoding = encoding;
+    // 安装数据库
+    const mysqlResult = await MysqlService.initMysql(mysqlConf).catch(err => {
       think.logger.error(err.message);
       return err;
     });
-    if (think.isError(result)) {
-      console.log(result);
-      return this.fail();
+    if (think.isError(mysqlResult)) {
+      return this.fail(mysqlResult.message);
     }
+
+    // 将用户添加到用户表中，并给予权限
+    // MysqlService.setModelAdapter(mysqlConf);
+    // const userModel = this.model('user');
+    // const datetime = think.datetime(new Date());
+    // const adminInfo = Object.assign({}, userConf, {
+    //   is_admin: 3,
+    //   create_time: datetime,
+    //   last_login: datetime,
+    //   login_ip: this.ctx.ip,
+    //   enable: 1
+    // });
+    // await userModel.add(adminInfo);
+
+    // 将配置保存到文件中
+    const installSetting = { user: userConf, mysql: mysqlConf, influx: influxConf };
+    await writeFile(path.join(think.ROOT_PATH, '.install_setting'), JSON.stringify(installSetting));
     // 201 Created
     this.status = 201;
     return this.success(undefined, '安装成功');
