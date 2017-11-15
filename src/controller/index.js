@@ -6,9 +6,28 @@ const MysqlService = require('../service/mysql');
 const writeFile = util.promisify(fs.writeFile);
 
 module.exports = class extends Base {
+  /**
+   * 首页
+   */
   indexAction() {
     return this.display();
   }
+  /**
+   * 登录
+   */
+  async loginAction() {
+    return this.success();
+  }
+  /**
+   * 登出
+   */
+  async logoutAction() {
+    await this.session('sid', null);
+    return this.redirect('/');
+  }
+  /**
+   * 安装
+   */
   async installAction() {
     if (this.isGet) {
       if (this.ctx.checkInstalled) {

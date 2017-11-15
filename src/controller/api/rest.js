@@ -1,10 +1,10 @@
 const assert = require('assert');
+const Base = require('../base');
 
-module.exports = class extends think.Controller {
+module.exports = class extends Base {
   static get _REST() {
     return true;
   }
-
   constructor(ctx) {
     super(ctx);
     this.resource = this.getResource();
@@ -12,7 +12,12 @@ module.exports = class extends think.Controller {
     assert(think.isFunction(this.model), 'this.model must be a function');
     this.modelInstance = this.model(this.resource);
   }
-  __before() {}
+  __before() {
+    return super.__before().then(flag => {
+      if (flag === false) return false;
+      if (think.isEmpty(this.userInfo)) return this.toLogin();
+    });
+  }
   /**
    * get resource
    * @return {String} [resource name]
