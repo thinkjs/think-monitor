@@ -1,1 +1,5 @@
-module.exports = [['/login', 'index/login', 'post']];
+module.exports = [
+  ['/login', 'user/login', 'post'],
+  ['/logout', 'user/logout', 'get'],
+  ['/password', 'user/password', 'post,put,patch']
+];

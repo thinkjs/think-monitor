@@ -1,11 +1,9 @@
 module.exports = class extends think.Model {
   /**
-   * 获取用户信息
+   * checkPassword
    */
-  async getUserInfo(where) {
-    const userInfo = await this.where(where)
-      .find()
-      .catch(() => false);
-    return userInfo;
+  checkPassword(password, hashPassword) {
+    // 以后再改为hash
+    return password === hashPassword;
   }
 };

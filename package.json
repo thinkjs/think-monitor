@@ -11,13 +11,10 @@
     "dev-fe": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build-fe": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
-  "pre-commit": [
-    "lint-fix"
-  ],
+  "pre-commit": ["lint-fix"],
   "dependencies": {
-    "history": "^2.1.1",
     "influx": "^5.0.7",
-    "mysql": "^2.13.0",
+    "phpass": "^0.1.1",
     "ramda": "^0.25.0",
     "think-cache": "^1.0.0",
     "think-cache-file": "^1.0.8",

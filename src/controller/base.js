@@ -1,56 +1,58 @@
 const MysqlService = require('../service/mysql');
 
 module.exports = class extends think.Controller {
+  /**
+   * before method
+   */
   async __before() {
     this.ctx.checkInstalled = await MysqlService.checkInstalled();
-    if (this.ctx.action === 'install') {
-      return;
+    const { controller, action } = this.ctx;
+    const whiteList = ['index/install', 'user/login'];
+    const path = controller + '/' + action;
+    if (~whiteList.findIndex(item => item === path)) {
+      return true;
     }
+
     if (!this.ctx.checkInstalled) {
       return this.redirect('/index/install');
     }
-    const userInfo = await this.getUserInfo();
-    if (!think.isEmpty(userInfo)) {
-      this.userInfo = userInfo;
+
+    const userInfo = (await this.session('userInfo')) || {};
+    if (think.isEmpty(userInfo)) {
+      if (this.isAjax()) {
+        return this.fail('NOT_LOGIN');
+      }
+    }
+    this.userInfo = userInfo;
+    if (!this.isAjax()) {
       this.assign('userInfo', {
         sid: userInfo.sid,
         username: userInfo.username,
-        email: userInfo.email,
-        is_admin: userInfo.is_admin,
-        enable: userInfo.enable
+        is_admin: userInfo.is_admin
       });
     }
+
     if (this.isGet) {
-      let token = await this.session('token');
+      let token = this.session('token');
       if (!token) {
-        token = think.uuid().slice(0, 8);
-        await this.session('token', token);
+        token = think.uuid('v4').slice(0, 8);
+        this.assign('token', token);
       }
-      this.assign('token', token);
-    } else {
-      const stoken = await this.session('token');
-      const token = this.post('token');
-      if (!token || token !== stoken) {
-        return this.fail(1000, 'token 不匹配');
-      }
+      this.session('token', token);
+    }
+    const stoken = this.session('token');
+    const token = this.post('token');
+    if (!token || token !== stoken) {
+      return this.fail('token不匹配');
     }
   }
   /**
-   * 获取用户信息
+   * magic method
    */
-  async getUserInfo() {
-    const userModel = this.model('user');
-    const sid = await this.session('sid');
-    if (sid) {
-      const userInfo = await userModel.getUserInfo({ sid });
-      if (userInfo) return userInfo;
+  async __call() {
+    if (this.isAjax()) {
+      return this.fail('ACTION_NOT_FOUND');
     }
-    return {};
-  }
-  /**
-   * 登录页面
-   */
-  toLogin() {
-    return this.display();
+    return this.display('index_index');
   }
 };

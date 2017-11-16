@@ -7,38 +7,11 @@ const { generateLetters } = require('../util/index');
 const writeFile = think.promisify(fs.writeFile, fs);
 
 module.exports = class extends Base {
-  __before() {
-    return super.__before(flag => {
-      if (flag === false) return false;
-    });
-  }
   /**
    * 首页
    */
   indexAction() {
     return this.display();
-  }
-  /**
-   * 登录
-   */
-  async loginAction() {
-    const { username, password } = this.post('username,password');
-    const userModel = this.model('user');
-    const { sid } = await userModel.getUserInfo({ username, password });
-    const datetime = think.datetime(new Date());
-    await userModel.where({ sid }).update({
-      last_login: datetime,
-      login_ip: this.ip
-    });
-    await this.session('sid', sid);
-    return this.success();
-  }
-  /**
-   * 登出
-   */
-  async logoutAction() {
-    await this.session('sid', null);
-    return this.redirect('/');
   }
   /**
    * 安装
