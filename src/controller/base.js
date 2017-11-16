@@ -13,6 +13,7 @@ module.exports = class extends think.Controller {
     if (!think.isEmpty(userInfo)) {
       this.userInfo = userInfo;
       this.assign('userInfo', {
+        sid: userInfo.sid,
         username: userInfo.username,
         email: userInfo.email,
         is_admin: userInfo.is_admin,
@@ -42,7 +43,7 @@ module.exports = class extends think.Controller {
     const sid = await this.session('sid');
     if (sid) {
       const userInfo = await userModel.getUserInfo({ sid });
-      if (!think.isEmpty(userInfo)) return userInfo;
+      if (userInfo) return userInfo;
     }
     return {};
   }

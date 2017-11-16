@@ -19,9 +19,13 @@ module.exports = class extends think.Service {
    * 获取数据库连接实例
    * @param {Object} mysql - 数据库配置
    */
-  static getInstance(mysql) {
-    const { host, port, user, password, encoding = 'utf8' } = mysql;
-    this.setModelAdapter({ host, port, user, password, encoding });
+  static getInstance(mysql, useDB = false) {
+    const config = Object.assign({}, mysql);
+    // 默认不使用数据库
+    if (!useDB) {
+      delete config.database;
+    }
+    this.setModelAdapter(config);
     return think.model();
   }
   /**
@@ -116,7 +120,7 @@ module.exports = class extends think.Service {
     const installSetting = fs.readFileSync(settingPath);
     const tables = ['user', 'permission']; // permisson
     const { mysql } = JSON.parse(installSetting);
-    const modelInstance = this.getInstance(mysql);
+    const modelInstance = this.getInstance(mysql, true);
     const tableSet = await modelInstance
       .query(
         "SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA`='" +

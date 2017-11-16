@@ -1,5 +1,14 @@
 module.exports = class extends think.Logic {
-  indexAction() {}
+  loginAction() {
+    this.rules = {
+      username: {
+        required: true
+      },
+      password: {
+        required: true
+      }
+    };
+  }
   installAction() {
     if (this.isGet) {
       return;

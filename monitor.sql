@@ -1,17 +1,18 @@
-DROP TABLE IF EXISTS `fk_permission`;
-CREATE TABLE `fk_permission` (
+DROP TABLE IF EXISTS `tm_permission`;
+CREATE TABLE `tm_permission` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `user_id` int(11) NOT NULL COMMENT '逻辑外键，用户id',
   `project_id` int(11) NOT NULL COMMENT '逻辑外键，项目id',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='权限表';
-LOCK TABLES `fk_permission` WRITE;
+LOCK TABLES `tm_permission` WRITE;
 UNLOCK TABLES;
 
-DROP TABLE IF EXISTS `fk_user`;
-CREATE TABLE `fk_user` (
+DROP TABLE IF EXISTS `tm_user`;
+CREATE TABLE `tm_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id，自增主键',
+  `sid` char(12) NOT NULL COMMENT '用户sid',
   `username` varchar(16) NOT NULL COMMENT '用户名',
   `password` varchar(16) NOT NULL COMMENT '密码',
   `email` varchar(32) DEFAULT NULL COMMENT '邮箱',
@@ -22,5 +23,5 @@ CREATE TABLE `fk_user` (
   `enable` varchar(1) NOT NULL DEFAULT '1' COMMENT '是否锁定行为，1允许，2禁止。锁定包括登陆在内一切行为。',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户表';
-LOCK TABLES `fk_user` WRITE;
+LOCK TABLES `tm_user` WRITE;
 UNLOCK TABLES;

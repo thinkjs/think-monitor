@@ -1,11 +1,17 @@
 const fs = require('fs');
 const path = require('path');
-const util = require('util');
 const Base = require('./base.js');
 const MysqlService = require('../service/mysql');
-const writeFile = util.promisify(fs.writeFile);
+const { generateLetters } = require('../util/index');
+
+const writeFile = think.promisify(fs.writeFile, fs);
 
 module.exports = class extends Base {
+  __before() {
+    return super.__before(flag => {
+      if (flag === false) return false;
+    });
+  }
   /**
    * 首页
    */
@@ -16,6 +22,15 @@ module.exports = class extends Base {
    * 登录
    */
   async loginAction() {
+    const { username, password } = this.post('username,password');
+    const userModel = this.model('user');
+    const { sid } = await userModel.getUserInfo({ username, password });
+    const datetime = think.datetime(new Date());
+    await userModel.where({ sid }).update({
+      last_login: datetime,
+      login_ip: this.ip
+    });
+    await this.session('sid', sid);
     return this.success();
   }
   /**
@@ -90,6 +105,7 @@ module.exports = class extends Base {
     const userModel = this.model('user');
     const datetime = think.datetime(new Date());
     const adminInfo = Object.assign({}, userConf, {
+      sid: generateLetters(),
       is_admin: 3,
       create_time: datetime,
       last_login: datetime,
