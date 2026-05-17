@@ -1,3 +1,5 @@
+This repository has been migrated. For ongoing updates, please see https://github.com/thinkjs/thinkjs/tree/master/packages/think-monitor.
+
 # think-monitor
 thinkjs 3.0 server monitor, alive, cpu, memory
 
